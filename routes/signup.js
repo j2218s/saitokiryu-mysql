@@ -4,8 +4,7 @@ const knex = require("../db/knex");
 const bcrypt = require("bcrypt");
 
 router.get('/', function (req, res, next) {
-  const userId = req.session.userid;
-  const isAuth = Boolean(userId);
+  const isAuth = req.isAuthenticated();
   res.render('signup', {
     title: 'Sign up',
     isAuth: isAuth,
@@ -13,11 +12,11 @@ router.get('/', function (req, res, next) {
 });
 
 router.post('/', function (req, res, next) {
-  const userId = req.session.userid;
-  const isAuth = Boolean(userId);
+  const isAuth = req.isAuthenticated();
   const username = req.body.username;
   const password = req.body.password;
   const repassword = req.body.repassword;
+  const height = req.body.height;
 
   knex("users")
     .where({name: username})
@@ -32,7 +31,7 @@ router.post('/', function (req, res, next) {
       } else if (password === repassword) {
         const hashedPassword = await bcrypt.hash(password, 10);
         knex("users")
-          .insert({name: username, password: hashedPassword})
+          .insert({name: username, password: hashedPassword, height: height})
           .then(function () {
             res.redirect("/");
           })

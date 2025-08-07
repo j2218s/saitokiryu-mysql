@@ -3,6 +3,9 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const session = require('express-session');
+const flash = require('connect-flash');
+const passport = require('passport');
 const app = express();
 
 // view engine setup
@@ -15,8 +18,20 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// セッションとフラッシュメッセージのミドルウェア
+app.use(session({
+  secret: 'secretCuisine123',
+  resave: false,
+  saveUninitialized: false
+}));
+app.use(flash());
+
+// Passport.jsのミドルウェアをセッションの後に設定
+app.use(passport.initialize());
+app.use(passport.session());
+
 // authorization
-require("./config/passport")(app);
+// require("./config/passport")(app);
 
 // router
 app.use('/', require('./routes'));
