@@ -1,10 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const passport = require("passport");
+const passport = require("../config/passport"); // 修正: config/passport.jsからインポート
 
 router.get('/', function (req, res, next) {
-  const userId = req.session.userid;
-  const isAuth = Boolean(userId);
+  const isAuth = req.isAuthenticated();
   res.render("signin", {
     title: "Sign in",
     isAuth: isAuth,
