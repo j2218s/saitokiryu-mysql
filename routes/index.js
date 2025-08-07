@@ -1,48 +1,38 @@
 const express = require('express');
 const router = express.Router();
-const mysql = require('mysql');
-
-const connectionConfig = {
-  host: 'localhost',
-  user: 'root',
-  password: 'password',
-  database: 'todo_app'
-};
+const knex = require('../db/knex');
 
 router.get('/', function (req, res, next) {
-  const connection = mysql.createConnection(connectionConfig);
-  connection.query(
-    'select * from tasks;',
-    (error, results) => {
-      connection.end();
-      if (error) {
-        console.error('Error fetching tasks:', error);
-        return res.render('index', {
-          title: 'ToDo App (Error)',
-          todos: []
-        });
-      }
+  knex("tasks")
+    .select("*")
+    .then(function (results) {
+      console.log(results);
       res.render('index', {
         title: 'ToDo App',
         todos: results,
       });
-    }
-  );
+    })
+    .catch(function (err) {
+      console.error(err);
+      res.render('index', {
+        title: 'ToDo App',
+      });
+    });
 });
 
 router.post('/', function (req, res, next) {
-  const connection = mysql.createConnection(connectionConfig);
   const todo = req.body.add;
-  connection.query(
-    `insert into tasks (user_id, content) values (1, '${todo}');`,
-    (error, results) => {
-      connection.end();
-      if (error) {
-        console.error('Error inserting task:', error);
-      }
+  knex("tasks")
+    .insert({user_id: 1, content: todo})
+    .then(function () {
       res.redirect('/');
-    }
-  );
+    })
+    .catch(function (err) {
+      console.error(err);
+      res.render('index', {
+        title: 'ToDo App',
+      });
+    });
 });
 
 module.exports = router;
